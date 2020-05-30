@@ -12,8 +12,10 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 public class PaintClass extends View {
+
     Paint paint;
     Path path;
+
     public PaintClass(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 

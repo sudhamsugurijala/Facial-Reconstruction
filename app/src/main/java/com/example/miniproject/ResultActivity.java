@@ -15,6 +15,7 @@ public class ResultActivity extends AppCompatActivity {
 
     Bitmap out_bmp;
     byte[] result_byte_array;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

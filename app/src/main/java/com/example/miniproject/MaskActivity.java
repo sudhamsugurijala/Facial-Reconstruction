@@ -5,13 +5,22 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class MaskActivity extends AppCompatActivity {
 
@@ -20,7 +29,9 @@ public class MaskActivity extends AppCompatActivity {
     PaintClass paint;
     byte[] input_byte_array;
     byte[] mask_byte_array;
-    
+    EditText url;
+    EditText port;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         
@@ -30,8 +41,8 @@ public class MaskActivity extends AppCompatActivity {
         paint = new PaintClass(this, null);
 
         paint = findViewById(R.id.paint);
-        final EditText url = findViewById(R.id.editText);
-        Button send = findViewById(R.id.button4);
+        url = findViewById(R.id.editText);
+        port = findViewById(R.id.editText3);
         ImageView background = findViewById(R.id.imageView3);
 
         // get image from previous activity
@@ -44,29 +55,49 @@ public class MaskActivity extends AppCompatActivity {
         }
 
         background.setImageBitmap(input_bmp);
+    }
 
-        send.setOnClickListener(new View.OnClickListener() {
+    void connectServer(View v) {
+        // user picture bitmap is in input_bmp, mask is in maskPic obtained below
+        paint.setDrawingCacheEnabled(true);
+        maskPic = paint.getDrawingCache();
+
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        maskPic.compress(Bitmap.CompressFormat.PNG, 100, bout);
+        mask_byte_array = bout.toByteArray();
+
+        paint.destroyDrawingCache();
+
+        String addr = url.getText().toString();
+        String portnum = port.getText().toString();
+
+        String postURL = "http://"+addr+":"+portnum+"/reconstruct";
+
+        RequestBody postBodyImg = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("image", "input.jpg", RequestBody.create(MediaType.parse("image/*jpg"), input_byte_array))
+                .addFormDataPart("mask", "mask.jpg", RequestBody.create(MediaType.parse("image/*jpg"), mask_byte_array))
+                .build();
+
+        postRequest(postURL, postBodyImg);
+    }
+
+    void postRequest(String postURL, RequestBody postBody) {
+
+        OkHttpClient client = new OkHttpClient();
+
+        Request req = new Request.Builder().url(postURL).post(postBody).build();
+
+        client.newCall(req).enqueue(new Callback() {
             @Override
-            public void onClick(View v) {
+            public void onFailure(Call call, IOException e) {
+                call.cancel();
+            }
 
-                // user picture bitmap is in input_bmp, mask is in maskPic obtained below
-                paint.setDrawingCacheEnabled(true);
-                maskPic = paint.getDrawingCache();
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
 
-                ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                maskPic.compress(Bitmap.CompressFormat.PNG, 100, bout);
-                mask_byte_array = bout.toByteArray();
-
-                paint.destroyDrawingCache();
-
-                //send maskPic and input_bmp to server
-                String address = url.getText().toString();
-                
-                //send result to resultActivity
-                Intent resAct = new Intent(getApplicationContext(), ResultActivity.class);
-                resAct.putExtra("result", mask_byte_array);
-                startActivity(resAct);
             }
         });
+
     }
 }
