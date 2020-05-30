@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -53,7 +54,7 @@ public class MorphActivity extends AppCompatActivity {
                 String addr = url.getText().toString();
                 String portnum = port.getText().toString();
 
-                String postURL = "http://"+addr+":"+portnum+"/phi_morph";
+                String postURL = addr+":"+portnum+"/phi_morph";
 
                 RequestBody postBodyImg = new MultipartBody.Builder().setType(MultipartBody.FORM)
                         .addFormDataPart("image", "input.jpg", RequestBody.create(MediaType.parse("image/*jpg"), input_byte_array))
@@ -66,13 +67,17 @@ public class MorphActivity extends AppCompatActivity {
 
     void postRequest(String postURL, RequestBody postBody) {
 
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(3, TimeUnit.MINUTES)
+                .writeTimeout(3, TimeUnit.MINUTES)
+                .readTimeout(3, TimeUnit.MINUTES)
+                .build();
 
         Request req = new Request.Builder().url(postURL).post(postBody).build();
 
         client.newCall(req).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(Call call, final IOException e) {
                 call.cancel();
 
                 runOnUiThread(new Runnable() {
@@ -81,6 +86,7 @@ public class MorphActivity extends AppCompatActivity {
                         TextView error = findViewById(R.id.errorText);
                         error.setText("Error! Could not connect to server!");
                         error.setTextColor(Color.RED);
+                        e.printStackTrace();
                     }
                 });
             }
