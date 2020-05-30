@@ -2,10 +2,13 @@ package com.example.miniproject;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,25 +39,29 @@ public class MorphActivity extends AppCompatActivity {
         ImageView img = findViewById(R.id.imageView);
         url = findViewById(R.id.editText2);
         port = findViewById(R.id.portNummorph);
+        Button send = findViewById(R.id.button4);
 
         Bundle extras = getIntent().getExtras();
         input_byte_array = extras.getByteArray("image");
         input_bmp = BitmapFactory.decodeByteArray(input_byte_array,0, input_byte_array.length);
 
         img.setImageBitmap(input_bmp);
-    }
 
-    void connectServer(View v) {
-        String addr = url.getText().toString();
-        String portnum = port.getText().toString();
+        send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String addr = url.getText().toString();
+                String portnum = port.getText().toString();
 
-        String postURL = "http://"+addr+":"+portnum+"/phi_morph";
+                String postURL = "http://"+addr+":"+portnum+"/phi_morph";
 
-        RequestBody postBodyImg = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart("image", "input.jpg", RequestBody.create(MediaType.parse("image/*jpg"), input_byte_array))
-                .build();
+                RequestBody postBodyImg = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                        .addFormDataPart("image", "input.jpg", RequestBody.create(MediaType.parse("image/*jpg"), input_byte_array))
+                        .build();
 
-        postRequest(postURL, postBodyImg);
+                postRequest(postURL, postBodyImg);
+            }
+        });
     }
 
     void postRequest(String postURL, RequestBody postBody) {
@@ -67,11 +74,27 @@ public class MorphActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call call, IOException e) {
                 call.cancel();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TextView error = findViewById(R.id.errorText);
+                        error.setText("Error! Could not connect to server!");
+                        error.setTextColor(Color.RED);
+                    }
+                });
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TextView error = findViewById(R.id.errorText);
+                        error.setText("Connection Successful!");
+                        error.setTextColor(Color.GREEN);
+                    }
+                });
             }
         });
 

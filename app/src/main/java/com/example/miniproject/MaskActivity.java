@@ -3,10 +3,13 @@ package com.example.miniproject;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -44,6 +47,7 @@ public class MaskActivity extends AppCompatActivity {
         url = findViewById(R.id.editText);
         port = findViewById(R.id.editText3);
         ImageView background = findViewById(R.id.imageView3);
+        Button send = findViewById(R.id.button4);
 
         // get image from previous activity
         Bundle extras = getIntent().getExtras();
@@ -55,30 +59,33 @@ public class MaskActivity extends AppCompatActivity {
         }
 
         background.setImageBitmap(input_bmp);
-    }
 
-    void connectServer(View v) {
-        // user picture bitmap is in input_bmp, mask is in maskPic obtained below
-        paint.setDrawingCacheEnabled(true);
-        maskPic = paint.getDrawingCache();
+        send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // user picture bitmap is in input_bmp, mask is in maskPic obtained below
+                paint.setDrawingCacheEnabled(true);
+                maskPic = paint.getDrawingCache();
 
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        maskPic.compress(Bitmap.CompressFormat.PNG, 100, bout);
-        mask_byte_array = bout.toByteArray();
+                ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                maskPic.compress(Bitmap.CompressFormat.PNG, 100, bout);
+                mask_byte_array = bout.toByteArray();
 
-        paint.destroyDrawingCache();
+                paint.destroyDrawingCache();
 
-        String addr = url.getText().toString();
-        String portnum = port.getText().toString();
+                String addr = url.getText().toString();
+                String portnum = port.getText().toString();
 
-        String postURL = "http://"+addr+":"+portnum+"/reconstruct";
+                String postURL = "http://"+addr+":"+portnum+"/reconstruct";
 
-        RequestBody postBodyImg = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart("image", "input.jpg", RequestBody.create(MediaType.parse("image/*jpg"), input_byte_array))
-                .addFormDataPart("mask", "mask.jpg", RequestBody.create(MediaType.parse("image/*jpg"), mask_byte_array))
-                .build();
+                RequestBody postBodyImg = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                        .addFormDataPart("image", "input.jpg", RequestBody.create(MediaType.parse("image/*jpg"), input_byte_array))
+                        .addFormDataPart("mask", "mask.jpg", RequestBody.create(MediaType.parse("image/*jpg"), mask_byte_array))
+                        .build();
 
-        postRequest(postURL, postBodyImg);
+                postRequest(postURL, postBodyImg);
+            }
+        });
     }
 
     void postRequest(String postURL, RequestBody postBody) {
@@ -91,11 +98,27 @@ public class MaskActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call call, IOException e) {
                 call.cancel();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TextView error = findViewById(R.id.errorText2);
+                        error.setText("Error! Could not connect to server!");
+                        error.setTextColor(Color.RED);
+                    }
+                });
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TextView error = findViewById(R.id.errorText2);
+                        error.setText("Connection Successful");
+                        error.setTextColor(Color.GREEN);
+                    }
+                });
             }
         });
 
