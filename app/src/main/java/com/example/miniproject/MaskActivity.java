@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +37,7 @@ public class MaskActivity extends AppCompatActivity {
     byte[] mask_byte_array;
     EditText url;
     EditText port;
+    TextView error;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -98,6 +101,9 @@ public class MaskActivity extends AppCompatActivity {
                 .build();
 
         Request req = new Request.Builder().url(postURL).post(postBody).build();
+        error = findViewById(R.id.errorText2);
+        error.setText("Connecting to Server ...");
+        error.setTextColor(Color.BLACK);
 
         client.newCall(req).enqueue(new Callback() {
             @Override
@@ -107,7 +113,6 @@ public class MaskActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        TextView error = findViewById(R.id.errorText2);
                         error.setText("Error! Could not connect to server!");
                         error.setTextColor(Color.RED);
                         e.printStackTrace();
@@ -116,13 +121,28 @@ public class MaskActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, final Response response) throws IOException {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        TextView error = findViewById(R.id.errorText2);
                         error.setText("Connection Successful");
                         error.setTextColor(Color.GREEN);
+                        try {
+                            String resp = response.body().string();
+                            if(resp.equals("Try another Photo")) {
+                                error.setText("Error! Try another photo");
+                                error.setTextColor(Color.RED);
+                            }
+                            else {
+                                byte[] resImg = Base64.decode(resp, Base64.DEFAULT);
+
+                                Intent resAct = new Intent(getApplicationContext(), ResultActivity.class);
+                                resAct.putExtra("result", resImg);
+                                startActivity(resAct);
+                            }
+                        } catch(IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
             }
