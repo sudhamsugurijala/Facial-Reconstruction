@@ -68,20 +68,26 @@ public class MorphActivity extends AppCompatActivity {
         });
     }
 
+    OkHttpClient client = new OkHttpClient.Builder()
+            .connectTimeout(3, TimeUnit.MINUTES)
+            .writeTimeout(3, TimeUnit.MINUTES)
+            .readTimeout(3, TimeUnit.MINUTES)
+            .build();
+
+    Call post(String url, RequestBody postBody, Callback callback) {
+        Request req = new Request.Builder().url(url).post(postBody).build();
+        Call call = client.newCall(req);
+        call.enqueue(callback);
+        return call;
+    }
+
     void postRequest(String postURL, RequestBody postBody) {
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(3, TimeUnit.MINUTES)
-                .writeTimeout(3, TimeUnit.MINUTES)
-                .readTimeout(3, TimeUnit.MINUTES)
-                .build();
-
-        Request req = new Request.Builder().url(postURL).post(postBody).build();
         error = findViewById(R.id.errorText);
         error.setText("Connecting to Server ...");
         error.setTextColor(Color.BLACK);
 
-        client.newCall(req).enqueue(new Callback() {
+        post(postURL, postBody,new Callback() {
             @Override
             public void onFailure(Call call, final IOException e) {
                 call.cancel();
@@ -98,11 +104,12 @@ public class MorphActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
-                runOnUiThread(new Runnable() {
+                Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
                         error.setText("Connection Successful!");
                         error.setTextColor(Color.GREEN);
+
                         try {
                             String resp = response.body().string();
                             System.out.println(resp);
@@ -122,8 +129,8 @@ public class MorphActivity extends AppCompatActivity {
                         }
                     }
                 });
+                thread.run();
             }
         });
-
     }
 }
