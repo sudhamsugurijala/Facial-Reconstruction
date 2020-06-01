@@ -1,63 +1,58 @@
 package com.example.miniproject;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Spinner;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.ByteArrayOutputStream;
-
 public class MainActivity extends AppCompatActivity {
 
-    ImageView picture = null;
-    Button mask = null;
-    Button morph = null;
-    TextView alert = null;
-    Uri uri;
+    Button mask=null;
+    Button morph=null;
+    TextView alert=null;
+    Button next=null;
+    EditText url=null;
+    EditText port=null;
+
+    String urlVal="";
+    String portVal="";
+    String fullUrl="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final Spinner choice = findViewById(R.id.spinnerObj);
-        Button select = findViewById(R.id.button);
+        next = findViewById(R.id.button);
         mask = findViewById(R.id.button2);
         morph = findViewById(R.id.button3);
-        alert = findViewById(R.id.textView2);
+        alert = findViewById(R.id.textView4);
+        url = findViewById(R.id.editTextTextPersonName);
+        port = findViewById(R.id.editTextTextPersonName2);
 
-        alert.setVisibility(View.INVISIBLE);
         mask.setVisibility(View.INVISIBLE);
         morph.setVisibility(View.INVISIBLE);
+        alert.setVisibility(View.INVISIBLE);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.choices, R.layout.support_simple_spinner_dropdown_item);
-        adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
-        choice.setAdapter(adapter);
-
-        select.setOnClickListener(new View.OnClickListener() {
+        next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String ch = choice.getSelectedItem().toString();
-                if (ch.equals("Camera")) {
-                    Intent picture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    startActivityForResult(picture, 0);
-                } else if (ch.equals("Gallery")) {
-                    Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-                    startActivityForResult(gallery, 1);
+                urlVal = url.getText().toString();
+                portVal = port.getText().toString();
+
+                if(urlVal.equals("") || portVal.equals(""))  {
+                    Toast.makeText(MainActivity.this, "Please enter necessary information",
+                            Toast.LENGTH_LONG).show();
+                }
+                else {
+                    mask.setVisibility(View.VISIBLE);
+                    morph.setVisibility(View.VISIBLE);
+                    alert.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -65,15 +60,11 @@ public class MainActivity extends AppCompatActivity {
         mask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // send picture to next activity
-                Drawable drawable = picture.getDrawable();
-                Bitmap bmp = ((BitmapDrawable) drawable).getBitmap();
-                ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                bmp.compress(Bitmap.CompressFormat.PNG, 100, bout);
-                byte[] b = bout.toByteArray();
+                // send url to next activity
+                fullUrl = "http://"+urlVal+":"+portVal+"/reconstruct";
 
                 Intent reconstruct = new Intent(getApplicationContext(), MaskActivity.class);
-                reconstruct.putExtra("image", b);
+                reconstruct.putExtra("url", fullUrl);
                 startActivity(reconstruct);
             }
         });
@@ -81,53 +72,16 @@ public class MainActivity extends AppCompatActivity {
         morph.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // send picture to next activity
-                Drawable drawable = picture.getDrawable();
-                Bitmap bmp = ((BitmapDrawable) drawable).getBitmap();
-                ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                bmp.compress(Bitmap.CompressFormat.PNG, 100, bout);
-                byte[] b = bout.toByteArray();
+                // send url to next activity
+                fullUrl = "http://"+urlVal+":"+portVal+"/phi_morph";
 
                 Intent phi = new Intent(getApplicationContext(), MorphActivity.class);
-                phi.putExtra("image", b);
+                phi.putExtra("url", fullUrl);
                 startActivity(phi);
             }
         });
     }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode != RESULT_CANCELED) {
-            switch(requestCode) {
-                case 0:
-                    if(resultCode == RESULT_OK && data != null) {
-                        Bitmap pic = (Bitmap) data.getExtras().get("data");
-                        picture = findViewById(R.id.imageView);
-                        picture.setImageBitmap(pic);
-                        //uri = data.getData();
-                        //cropFunct();
-                    }
-                    break;
-                case 1:
-                    if(resultCode == RESULT_OK && data != null) {
-                        uri = data.getData();
-                        picture = findViewById(R.id.imageView);
-                        picture.setImageURI(uri);
-                    }
-                    break;
-                case 2: // kept for crop feature
-                    Bundle extras = data.getExtras();
-                    Bitmap pic = extras.getParcelable("data");
-                    picture = findViewById(R.id.imageView);
-                    picture.setImageBitmap(pic);
-            }
-            mask.setVisibility(View.VISIBLE);
-            morph.setVisibility(View.VISIBLE);
-            alert.setVisibility(View.VISIBLE);
-        }
-    }
-
+/*
     private void cropFunct() {
         try {
             Intent cropIntent = new Intent("com.android.camera.action.CROP");
@@ -143,5 +97,5 @@ public class MainActivity extends AppCompatActivity {
         } catch(ActivityNotFoundException e) {
             Toast.makeText(this, "Crop not supported", Toast.LENGTH_LONG).show();
         }
-    }
+    }*/
 }

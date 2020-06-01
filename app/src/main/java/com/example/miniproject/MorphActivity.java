@@ -2,19 +2,24 @@ package com.example.miniproject;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -29,41 +34,62 @@ import okhttp3.Response;
 
 public class MorphActivity extends AppCompatActivity {
 
-    Bitmap input_bmp;
-    byte[] input_byte_array;
-    EditText url;
-    EditText port;
-    TextView error;
+    ImageView display=null;
+    Button go=null;
+    Button send=null;
+    Spinner choice=null;
+    TextView error=null;
+    String url=null;
+
+    Bitmap pic=null;
+    ByteArrayOutputStream bout=null;
+    byte[] image_byte_array=null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.morph);
-        ImageView img = findViewById(R.id.imageView);
-        url = findViewById(R.id.editText2);
-        port = findViewById(R.id.portNummorph);
-        Button send = findViewById(R.id.button4);
+
+        display = findViewById(R.id.imageView);
+        choice = findViewById(R.id.spinnerObj2);
+        go = findViewById(R.id.button6);
+        send = findViewById(R.id.button4);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.choices, R.layout.support_simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+        choice.setAdapter(adapter);
 
         Bundle extras = getIntent().getExtras();
-        input_byte_array = extras.getByteArray("image");
-        input_bmp = BitmapFactory.decodeByteArray(input_byte_array,0, input_byte_array.length);
+        url = extras.getString("url");
 
-        img.setImageBitmap(input_bmp);
+        go.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String ch = choice.getSelectedItem().toString();
+                if (ch.equals("Camera")) {
+                    Intent picture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(picture, 0);
+                } else if (ch.equals("Gallery")) {
+                    Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+                    startActivityForResult(gallery, 1);
+                }
+            }
+        });
 
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String addr = url.getText().toString();
-                String portnum = port.getText().toString();
 
-                String postURL = addr+":"+portnum+"/phi_morph";
+                if(image_byte_array == null) {
+                    Toast.makeText(MorphActivity.this, "Please Choose an image", Toast.LENGTH_LONG).show();
+                }
+                else {
+                    RequestBody postBodyImg = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                            .addFormDataPart("image", "input.jpg", RequestBody.create(MediaType.parse("image/*jpg"), image_byte_array))
+                            .build();
 
-                RequestBody postBodyImg = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                        .addFormDataPart("image", "input.jpg", RequestBody.create(MediaType.parse("image/*jpg"), input_byte_array))
-                        .build();
-
-                postRequest(postURL, postBodyImg);
+                    postRequest(url, postBodyImg);
+                }
             }
         });
     }
@@ -132,5 +158,39 @@ public class MorphActivity extends AppCompatActivity {
                 thread.run();
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode != RESULT_CANCELED) {
+            switch(requestCode) {
+                case 0:
+                    if(resultCode == RESULT_OK && data != null) {
+                        pic = (Bitmap) data.getExtras().get("data");
+                        display.setImageBitmap(pic);
+
+                        bout = new ByteArrayOutputStream();
+                        pic.compress(Bitmap.CompressFormat.PNG, 100, bout);
+                        image_byte_array = bout.toByteArray();
+                    }
+                    break;
+                case 1:
+                    if(resultCode == RESULT_OK && data != null) {
+                        Uri uri = data.getData();
+                        display.setImageURI(uri);
+
+                        pic = ((BitmapDrawable)display.getDrawable()).getBitmap();
+                        bout = new ByteArrayOutputStream();
+                        pic.compress(Bitmap.CompressFormat.PNG, 100, bout);
+                        image_byte_array = bout.toByteArray();
+                    }
+                    break;
+                case 2: // kept for crop feature
+                    Bundle extras = data.getExtras();
+                    pic = extras.getParcelable("data");
+                    display.setImageBitmap(pic);
+            }
+        }
     }
 }

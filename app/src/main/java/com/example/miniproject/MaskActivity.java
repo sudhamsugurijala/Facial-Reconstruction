@@ -4,13 +4,19 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,14 +36,19 @@ import okhttp3.Response;
 
 public class MaskActivity extends AppCompatActivity {
 
-    Bitmap input_bmp;
-    Bitmap maskPic;
-    PaintClass paint;
-    byte[] input_byte_array;
-    byte[] mask_byte_array;
-    EditText url;
-    EditText port;
-    TextView error;
+    ImageView display=null;
+    Button go=null;
+    Button send=null;
+    Spinner choice=null;
+    TextView error=null;
+    String url=null;
+
+    Bitmap pic=null;
+    Bitmap mask=null;
+    PaintClass paint=null;
+    ByteArrayOutputStream bout=null;
+    byte[] image_byte_array=null;
+    byte[] mask_byte_array=null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,46 +58,60 @@ public class MaskActivity extends AppCompatActivity {
 
         paint = new PaintClass(this, null);
 
+        choice = findViewById(R.id.spinnerObj3);
+        go = findViewById(R.id.button7);
         paint = findViewById(R.id.paint);
-        url = findViewById(R.id.editText);
-        port = findViewById(R.id.editText3);
-        ImageView background = findViewById(R.id.imageView3);
-        Button send = findViewById(R.id.button4);
+        display = findViewById(R.id.imageView3);
+        send = findViewById(R.id.button4);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.choices, R.layout.support_simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+        choice.setAdapter(adapter);
+
+        go.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String ch = choice.getSelectedItem().toString();
+                if (ch.equals("Camera")) {
+                    Intent picture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(picture, 0);
+                } else if (ch.equals("Gallery")) {
+                    Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+                    startActivityForResult(gallery, 1);
+                }
+            }
+        });
 
         // get image from previous activity
         Bundle extras = getIntent().getExtras();
-        try {
-            input_byte_array = extras.getByteArray("image");
-            input_bmp = BitmapFactory.decodeByteArray(input_byte_array, 0, input_byte_array.length);
-        } catch(NullPointerException e) {
-            e.getMessage();
-        }
+        url = extras.getString("url");
 
-        background.setImageBitmap(input_bmp);
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // user picture bitmap is in input_bmp, mask is in maskPic obtained below
-                paint.setBackgroundColor(Color.WHITE);
-                paint.setDrawingCacheEnabled(true);
-                maskPic = paint.getDrawingCache();
 
-                ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                maskPic.compress(Bitmap.CompressFormat.PNG, 100, bout);
-                mask_byte_array = bout.toByteArray();
+                if(image_byte_array == null) {
+                    Toast.makeText(MaskActivity.this, "Please Choose an image", Toast.LENGTH_LONG).show();
+                }
+                else {
+                    // user picture bitmap is in input_bmp, mask is in maskPic obtained below
+                    paint.setBackgroundColor(Color.WHITE);
+                    paint.setDrawingCacheEnabled(true);
+                    mask = paint.getDrawingCache();
 
-                paint.destroyDrawingCache();
+                    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                    mask.compress(Bitmap.CompressFormat.PNG, 100, bout);
+                    mask_byte_array = bout.toByteArray();
 
-                String addr = url.getText().toString();
-                String portnum = port.getText().toString();
-                String postURL = addr+":"+portnum+"/reconstruct";
+                    paint.destroyDrawingCache();
 
-                RequestBody postBodyImg = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                        .addFormDataPart("image", "input.jpg", RequestBody.create(MediaType.parse("image/*jpg"), input_byte_array))
-                        .addFormDataPart("mask", "mask.jpg", RequestBody.create(MediaType.parse("image/*jpg"), mask_byte_array))
-                        .build();
+                    RequestBody postBodyImg = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                            .addFormDataPart("image", "input.jpg", RequestBody.create(MediaType.parse("image/*jpg"), image_byte_array))
+                            .addFormDataPart("mask", "mask.jpg", RequestBody.create(MediaType.parse("image/*jpg"), mask_byte_array))
+                            .build();
 
-                postRequest(postURL, postBodyImg);
+                    postRequest(url, postBodyImg);
+                }
             }
         });
     }
@@ -155,6 +180,39 @@ public class MaskActivity extends AppCompatActivity {
                 thread.run();
             }
         });
+    }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode != RESULT_CANCELED) {
+            switch(requestCode) {
+                case 0:
+                    if(resultCode == RESULT_OK && data != null) {
+                        pic = (Bitmap) data.getExtras().get("data");
+                        display.setImageBitmap(pic);
+
+                        bout = new ByteArrayOutputStream();
+                        pic.compress(Bitmap.CompressFormat.PNG, 100, bout);
+                        image_byte_array = bout.toByteArray();
+                    }
+                    break;
+                case 1:
+                    if(resultCode == RESULT_OK && data != null) {
+                        Uri uri = data.getData();
+                        display.setImageURI(uri);
+
+                        pic = ((BitmapDrawable)display.getDrawable()).getBitmap();
+                        bout = new ByteArrayOutputStream();
+                        pic.compress(Bitmap.CompressFormat.PNG, 100, bout);
+                        image_byte_array = bout.toByteArray();
+                    }
+                    break;
+                case 2: // kept for crop feature
+                    Bundle extras = data.getExtras();
+                    pic = extras.getParcelable("data");
+                    display.setImageBitmap(pic);
+            }
+        }
     }
 }
