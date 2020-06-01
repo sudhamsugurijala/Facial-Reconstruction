@@ -85,7 +85,7 @@ public class MorphActivity extends AppCompatActivity {
                 }
                 else {
                     RequestBody postBodyImg = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                            .addFormDataPart("image", "input.jpg", RequestBody.create(MediaType.parse("image/*jpg"), image_byte_array))
+                            .addFormDataPart("image", "input.png", RequestBody.create(MediaType.parse("image/*png"), image_byte_array))
                             .build();
 
                     postRequest(url, postBodyImg);
@@ -95,9 +95,9 @@ public class MorphActivity extends AppCompatActivity {
     }
 
     OkHttpClient client = new OkHttpClient.Builder()
-            .connectTimeout(3, TimeUnit.MINUTES)
-            .writeTimeout(3, TimeUnit.MINUTES)
-            .readTimeout(3, TimeUnit.MINUTES)
+            .connectTimeout(5, TimeUnit.MINUTES)
+            .writeTimeout(5, TimeUnit.MINUTES)
+            .readTimeout(5, TimeUnit.MINUTES)
             .build();
 
     Call post(String url, RequestBody postBody, Callback callback) {
@@ -169,6 +169,9 @@ public class MorphActivity extends AppCompatActivity {
                     if(resultCode == RESULT_OK && data != null) {
                         pic = (Bitmap) data.getExtras().get("data");
                         display.setImageBitmap(pic);
+
+                        // get cropped image
+                        pic = ((BitmapDrawable)display.getDrawable()).getBitmap();
 
                         bout = new ByteArrayOutputStream();
                         pic.compress(Bitmap.CompressFormat.PNG, 100, bout);
