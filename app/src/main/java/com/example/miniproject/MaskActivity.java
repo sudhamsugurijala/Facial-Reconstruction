@@ -69,6 +69,10 @@ public class MaskActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         choice.setAdapter(adapter);
 
+        error = findViewById(R.id.errorText2);
+        error.setTextColor(Color.BLUE);
+        error.setText("Image size must not exceed 500 kb!");
+
         go.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -132,7 +136,6 @@ public class MaskActivity extends AppCompatActivity {
 
     void postRequest(String postURL, RequestBody postBody) {
 
-        error = findViewById(R.id.errorText2);
         error.setText("Connecting to Server ... (Might take a few minutes)");
         error.setTextColor(Color.BLACK);
 

@@ -60,6 +60,10 @@ public class MorphActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         choice.setAdapter(adapter);
 
+        error = findViewById(R.id.errorText);
+        error.setTextColor(Color.BLUE);
+        error.setText("Image size must not exceed 500 kb!");
+
         Bundle extras = getIntent().getExtras();
         url = extras.getString("url");
 
@@ -110,7 +114,6 @@ public class MorphActivity extends AppCompatActivity {
 
     void postRequest(String postURL, RequestBody postBody) {
 
-        error = findViewById(R.id.errorText);
         error.setText("Connecting to Server ...");
         error.setTextColor(Color.BLACK);
 
