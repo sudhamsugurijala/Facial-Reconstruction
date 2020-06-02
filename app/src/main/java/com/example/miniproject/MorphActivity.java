@@ -42,6 +42,7 @@ public class MorphActivity extends AppCompatActivity {
     String url=null;
 
     Bitmap pic=null;
+    Bitmap cropTemp=null;
     ByteArrayOutputStream bout=null;
     byte[] image_byte_array=null;
 
@@ -167,11 +168,20 @@ public class MorphActivity extends AppCompatActivity {
             switch(requestCode) {
                 case 0:
                     if(resultCode == RESULT_OK && data != null) {
-                        pic = (Bitmap) data.getExtras().get("data");
-                        display.setImageBitmap(pic);
+                        cropTemp = (Bitmap) data.getExtras().get("data");
 
-                        // get cropped image
-                        pic = ((BitmapDrawable)display.getDrawable()).getBitmap();
+                        // crop center of image into the to-be sent bitmap (for 1:1 ratio)
+                        if(cropTemp.getWidth() >= cropTemp.getHeight()) {
+                            pic = Bitmap.createBitmap(cropTemp,
+                                    (cropTemp.getWidth()/2) - (cropTemp.getHeight()/2), 0,
+                                    cropTemp.getHeight(), cropTemp.getHeight());
+                        }
+                        else {
+                            pic = Bitmap.createBitmap(cropTemp,
+                                    (cropTemp.getHeight()/2) - (cropTemp.getWidth()/2), 0,
+                                    cropTemp.getWidth(), cropTemp.getWidth());
+                        }
+                        display.setImageBitmap(pic);
 
                         bout = new ByteArrayOutputStream();
                         pic.compress(Bitmap.CompressFormat.PNG, 100, bout);
@@ -183,7 +193,21 @@ public class MorphActivity extends AppCompatActivity {
                         Uri uri = data.getData();
                         display.setImageURI(uri);
 
-                        pic = ((BitmapDrawable)display.getDrawable()).getBitmap();
+                        cropTemp = ((BitmapDrawable)display.getDrawable()).getBitmap();
+
+                        // crop center of image into the to-be sent bitmap (for 1:1 ratio)
+                        if(cropTemp.getWidth() >= cropTemp.getHeight()) {
+                            pic = Bitmap.createBitmap(cropTemp,
+                                    (cropTemp.getWidth()/2) - (cropTemp.getHeight()/2), 0,
+                                    cropTemp.getHeight(), cropTemp.getHeight());
+                        }
+                        else {
+                            pic = Bitmap.createBitmap(cropTemp,
+                                    (cropTemp.getHeight()/2) - (cropTemp.getWidth()/2), 0,
+                                    cropTemp.getWidth(), cropTemp.getWidth());
+                        }
+                        display.setImageBitmap(pic);
+
                         bout = new ByteArrayOutputStream();
                         pic.compress(Bitmap.CompressFormat.PNG, 100, bout);
                         image_byte_array = bout.toByteArray();
