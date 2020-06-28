@@ -10,8 +10,8 @@ Steps:
 
 ### Repository Configuration
 
-* The server directory contains a simple flask server which is used for hosting the generator model.
-* Every other directory belongs to the app (User Interface) developed in Android Studio (Java).
+* The **server directory** contains a simple **flask server** which is used for hosting the generator model.
+* Every other directory belongs to the app (User Interface) developed in **Android Studio (Java)**.
 
 ### Acknowledgements
 
