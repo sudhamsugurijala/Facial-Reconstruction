@@ -104,6 +104,9 @@ public class MaskActivity extends AppCompatActivity {
                     paint.setDrawingCacheEnabled(true);
                     mask = paint.getDrawingCache();
 
+                    paint.setVisibility(View.INVISIBLE);
+                    display.setVisibility(View.INVISIBLE);
+
                     ByteArrayOutputStream bout = new ByteArrayOutputStream();
                     mask.compress(Bitmap.CompressFormat.PNG, 100, bout);
                     mask_byte_array = bout.toByteArray();
