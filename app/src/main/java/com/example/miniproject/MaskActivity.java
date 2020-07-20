@@ -241,10 +241,6 @@ public class MaskActivity extends AppCompatActivity {
                         image_byte_array = bout.toByteArray();
                     }
                     break;
-                case 2: // kept for crop feature
-                    Bundle extras = data.getExtras();
-                    pic = extras.getParcelable("data");
-                    display.setImageBitmap(pic);
             }
         }
     }
