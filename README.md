@@ -16,4 +16,4 @@ Steps:
 ### Acknowledgements
 
  The implementation of inpainting is mostly based on the tensorflow implementation of [inpainting_gmcnn by shepnerd](https://github.com/shepnerd/inpainting_gmcnn). 
-Slight moifications were made to accomodate custom masks drawn by users. 
+Slight modifications were made to accomodate custom masks drawn by users. 
