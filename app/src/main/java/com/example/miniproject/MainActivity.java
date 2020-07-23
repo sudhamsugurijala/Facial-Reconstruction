@@ -81,21 +81,4 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-/*
-    private void cropFunct() {
-        try {
-            Intent cropIntent = new Intent("com.android.camera.action.CROP");
-            cropIntent.setDataAndType(uri, "image/*");
-            cropIntent.putExtra("crop", "true");
-            cropIntent.putExtra("aspectX", 1);
-            cropIntent.putExtra("aspectY", 1);
-            cropIntent.putExtra("outputX", 512);
-            cropIntent.putExtra("outputY", 512);
-            cropIntent.putExtra("return-data", true);
-            startActivityForResult(cropIntent, 2);
-
-        } catch(ActivityNotFoundException e) {
-            Toast.makeText(this, "Crop not supported", Toast.LENGTH_LONG).show();
-        }
-    }*/
 }
