@@ -17,7 +17,7 @@ Steps:
 
 * The **model was trained on 512x512 HQ images**, therefore the results are subject to change with the image quality and the size of the mask (Hole). A sample is given below
 
-![Face with Injury](https://github.com/sudhamsugurijala/Facial_Reconstruction/tree/master/server/backup/can%20be%20used%20for%20report/before.jpg) ![Face with Mask]()
+![Face with Injury](/server/backup/can be used for report/before.jpg) ![Face with Mask]()
 ![Generated Face]() ![Ground Truth]()
 
 ### Acknowledgements
