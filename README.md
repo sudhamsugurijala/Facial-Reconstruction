@@ -13,6 +13,13 @@ Steps:
 * The **server directory** contains a simple **flask server** which is used for hosting the generator model.
 * Every other directory belongs to the app (User Interface) developed in **Android Studio (Java)**.
 
+### Results
+
+* The **model was trained on 512x512 HQ images**, therefore the results are subject to change with the image quality and the size of the mask (Hole). A sample is given below
+
+![Face with Injury](https://github.com/sudhamsugurijala/Facial_Reconstruction/tree/master/server/backup/can%20be%20used%20for%20report/before.jpg) ![Face with Mask]()
+![Generated Face]() ![Ground Truth]()
+
 ### Acknowledgements
 
  The implementation of inpainting is mostly based on the tensorflow implementation of [inpainting_gmcnn by shepnerd](https://github.com/shepnerd/inpainting_gmcnn). 
