@@ -17,9 +17,11 @@ Steps:
 
 * The **model was trained on 512x512 HQ images**, therefore the results are subject to change with the image quality and the size of the mask (Hole). A sample is given below
 
+Face with Injury | Face with mask drawn
+![Face with Injury](https://github.com/sudhamsugurijala/Facial_Reconstruction/blob/master/server/backup/can%20be%20used%20for%20report/before.jpg) |                    ![Face with Mask](https://github.com/sudhamsugurijala/Facial_Reconstruction/blob/master/server/backup/can%20be%20used%20for%20report/with_mask.jpg)
 
-![Face with Injury](https://github.com/sudhamsugurijala/Facial_Reconstruction/blob/master/server/backup/can%20be%20used%20for%20report/before.jpg)                    ![Face with Mask](https://github.com/sudhamsugurijala/Facial_Reconstruction/blob/master/server/backup/can%20be%20used%20for%20report/with_mask.jpg)\
-![Generated Face](https://github.com/sudhamsugurijala/Facial_Reconstruction/blob/master/server/backup/can%20be%20used%20for%20report/gen_img.jpg)                   ![Ground Truth](https://github.com/sudhamsugurijala/Facial_Reconstruction/blob/master/server/backup/can%20be%20used%20for%20report/ground_truth.jpg)
+Generated patch | Ground truth
+![Generated Face](https://github.com/sudhamsugurijala/Facial_Reconstruction/blob/master/server/backup/can%20be%20used%20for%20report/gen_img.jpg) |                  ![Ground Truth](https://github.com/sudhamsugurijala/Facial_Reconstruction/blob/master/server/backup/can%20be%20used%20for%20report/ground_truth.jpg)
 
 
 ### Acknowledgements
