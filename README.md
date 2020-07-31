@@ -32,6 +32,7 @@ Generated patch | Ground truth
 
 ### Acknowledgements
 
- The implementation of inpainting is mostly based on the tensorflow implementation of [inpainting_gmcnn by shepnerd](https://github.com/shepnerd/inpainting_gmcnn). 
+* The implementation of inpainting is mostly based on the tensorflow implementation of [inpainting_gmcnn by shepnerd](https://github.com/shepnerd/inpainting_gmcnn). 
 Slight modifications were made to accomodate custom masks drawn by users.
- The face morph feature is based on [FaceMorph by karanvivekbhargava](https://github.com/karanvivekbhargava/FaceMorph), modifications were made to adapt to any size of input image, and output the morphed face with a dark background.
+
+* The "face morph" feature is based on [FaceMorph by karanvivekbhargava](https://github.com/karanvivekbhargava/FaceMorph), modifications were made to adapt to any size of input image, and output the morphed face with a dark background.
