@@ -11,6 +11,8 @@ Steps:
 ### Repository Configuration
 
 * The **server directory** contains a simple **flask server** which is used for hosting the generator model.
+* NOTE #1: Download the "shape_predictor_68_face_landmarks.dat" file (available online) to the "server" folder for the morph feature to work.
+* NOTE #2: The server needs a "generator model" (about 800 Mb) for the reconstruction feature to work (more about this in the "Acknowledgements" section below).
 * Every other directory belongs to the app (User Interface) developed in **Android Studio (Java)**.
 
 ### Results
@@ -32,7 +34,7 @@ Generated patch | Ground truth
 
 ### Acknowledgements
 
-* The implementation of inpainting is mostly based on the tensorflow implementation of [inpainting_gmcnn by shepnerd](https://github.com/shepnerd/inpainting_gmcnn). 
-Slight modifications were made to accomodate custom masks drawn by users.
+* The implementation of inpainting is mostly based on the tensorflow implementation of [inpainting_gmcnn by shepnerd](https://github.com/shepnerd/inpainting_gmcnn) (**link to the generator model** and other requirements are specified in this same repository).
+Slight modifications were made in the inpainting code to accomodate custom masks drawn by users.
 
 * The "face morph" feature is based on [FaceMorph by karanvivekbhargava](https://github.com/karanvivekbhargava/FaceMorph), modifications were made to adapt to any size of input image, and output the morphed face with a dark background.
