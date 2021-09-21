@@ -1,4 +1,4 @@
-# Facial_Reconstruction
+# Facial-Reconstruction
 
 This project is an extended application of Image Inpainting ( refer [this](https://www.nvidia.com/research/inpainting/) demo by NVIDIA), 
 wherein the aim was to reconstruct an injured face.
